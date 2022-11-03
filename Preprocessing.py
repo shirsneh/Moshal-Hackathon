@@ -2,6 +2,7 @@ import glob
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import scipy
 from matplotlib.backends.backend_pdf import PdfPages
 from sklearn.cluster import KMeans
@@ -13,6 +14,11 @@ class HSI_processing():
     num_samples = None
     num_lines = None
     num_bands = None
+    DataSet = []
+    kmeans = None
+    ClusteredPixels = []
+    Segmentations = [2]
+    mean_vecs = []
 
     def load_data(self, header_path):
         _image = envi.open(header_path)
@@ -25,7 +31,7 @@ class HSI_processing():
     def visualize_raw_data(self , header_path):
             _image = envi.open(header_path)
             _data = _image.load()
-            HSlayers = [5, 30, 50, 82]
+            HSlayers = [5, 35,50,84]
             ChosenLayer = HSlayers[0]
             for ChosenLayer in HSlayers:
                 fig, ax = plt.subplots(figsize=(10, 7))
@@ -40,28 +46,48 @@ class HSI_processing():
     def KMeans(self , header_path):
         _image = envi.open(header_path)
         _data = _image.load()
-        DataSet = []  # generate data set for each pixel, a set of fixed X,Y - take all the layers combined as a vector
         for x in range(0, self.num_lines):
             for y in range(0, self.num_samples):
-                DataSet.append(_data.read_pixel(x,y))  # for each X,Y - take all the laywers as vector
-        Segmentations = [2, 3, 4, 5]
-        for Clusters in Segmentations:
+                self.DataSet.append(_data.read_pixel(x,y))  # for each X,Y - take all the laywers as vector
+        for Clusters in self.Segmentations:
             print(f"Training {Clusters} Clusters | size: {self.shape} | Layer:")
-            kmeans = KMeans(n_clusters=Clusters)  # create kmean model with number of clusters
-            kmeans.fit(DataSet)  # train the model on the data
+            self.kmeans = KMeans(n_clusters=Clusters)  # create kmean model with number of clusters
+            self.kmeans.fit(self.DataSet)  # train the model on the data
             # Check for each x,y position the cluster it belongs
             ClusteredPixel = np.zeros((self.num_lines, self.num_samples), dtype=int)
             for x in range(0, self.num_lines):
                 for y in range(0, self.num_samples):
-                    ClusteredPixel[x, y] = kmeans.predict(_data[x, y, :].reshape(1, -1).astype(float))
+                    ClusteredPixel[x, y] = self.kmeans.predict(_data[x, y, :].reshape(1, -1).astype(float))
             fig, ax = plt.subplots(figsize=(10, 7))
             plt.title(
                 f"ImageName:  \n ImageSize:{self.num_lines}x{self.num_samples} - {self.num_bands} Layers \n Layer:"
                 f"\n AI Algorithm for segmentation \n Image splited to {Clusters} different segmentation")
+            self.ClusteredPixels.append(ClusteredPixel)
+            # for i in range(Clusters):
+            #     print( self.kmeans.cluster_centers_[i, :])
             plt.imshow(ClusteredPixel)
             plt.show()
             ax.set(xlabel='Xaxis', ylabel='Yaxis')
+
+    def get_cluster_mean(self):
+        for i in range(len(self.Segmentations)):
+            for k in range(self.Segmentations[i]):
+                mask = np.argwhere(self.ClusteredPixels[i] == k)
+                sum = 0
+                for m in mask:
+                    sum += self.DataSet[m[0] * self.num_lines + m[1]]
+                mean = sum / len(mask)
+                self.mean_vecs.append(mean)
+
+
+
 prep = HSI_processing()
-prep.load_data("data/M3G20081118T222604_V01_RFL.HDR")
+prep.load_data("data/M3G20081129T171431_V01_RFL.HDR")
 # prep.visualize_raw_data("data/M3G20081118T222604_V01_RFL.HDR")
-prep.KMeans("data/M3G20081118T222604_V01_RFL.HDR")
+prep.KMeans("data/M3G20081129T171431_V01_RFL.HDR")
+prep.get_cluster_mean()
+print(prep.mean_vecs)
+# print(type(prep.ClusteredPixels))
+#
+# data = pd.read_csv('output_list.txt', sep=" ", header=None)
+# data.columns = ["a", "b", "c", "etc."]
