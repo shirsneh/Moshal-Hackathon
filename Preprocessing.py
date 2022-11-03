@@ -8,12 +8,11 @@ from matplotlib.backends.backend_pdf import PdfPages
 from sklearn.cluster import KMeans
 from spectral import *
 class HSI_processing():
-    _image = None
-    _data = None
     shape = None
     num_samples = None
     num_lines = None
     num_bands = None
+    HSlayers = [5, 35, 50, 84]
     DataSet = []
     kmeans = None
     ClusteredPixels = []
@@ -31,12 +30,10 @@ class HSI_processing():
     def visualize_raw_data(self , header_path):
             _image = envi.open(header_path)
             _data = _image.load()
-            HSlayers = [5, 35,50,84]
-            ChosenLayer = HSlayers[0]
-            for ChosenLayer in HSlayers:
+            for ChosenLayer in self.HSlayers:
                 fig, ax = plt.subplots(figsize=(10, 7))
                 plt.title(
-                    f"ImageName:  \n ImageSize:{self.num_lines}x{self.num_samples} - {self.num_bands} Layers \n Layer:{ChosenLayer}")
+                    f"ImageSize:{self.num_lines}x{self.num_samples} - {self.num_bands} Layers \n Layer:{ChosenLayer}")
                 ImageNP = np.asarray(_data[:, :, ChosenLayer])  # take the 2D matrix of the chosen layer
                 ax.set(xlabel='Xaxis', ylabel='Yaxis')
                 plt.imshow(ImageNP)  # show it
@@ -60,14 +57,12 @@ class HSI_processing():
                     ClusteredPixel[x, y] = self.kmeans.predict(_data[x, y, :].reshape(1, -1).astype(float))
             fig, ax = plt.subplots(figsize=(10, 7))
             plt.title(
-                f"ImageName:  \n ImageSize:{self.num_lines}x{self.num_samples} - {self.num_bands} Layers \n Layer:"
-                f"\n AI Algorithm for segmentation \n Image splited to {Clusters} different segmentation")
+                f"ImageSize:{self.num_lines}x{self.num_samples} - {self.num_bands} Layers \n AI Algorithm for segmentation "
+                f"\n Image splited to {Clusters} different segmentation")
             self.ClusteredPixels.append(ClusteredPixel)
-            # for i in range(Clusters):
-            #     print( self.kmeans.cluster_centers_[i, :])
+            ax.set(xlabel='Xaxis', ylabel='Yaxis')
             plt.imshow(ClusteredPixel)
             plt.show()
-            ax.set(xlabel='Xaxis', ylabel='Yaxis')
 
     def get_cluster_mean(self):
         for i in range(len(self.Segmentations)):
