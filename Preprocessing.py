@@ -1,27 +1,29 @@
-import glob
-
-import numpy as np
-import scipy.io as sp
-import re
 import matplotlib.pyplot as plt
-
-data_set = []
-def get_data_per_pixel(directory_path):
-    HSI_images_list=glob.glob(directory_path)
-    for HSIAddress in HSI_images_list:
-        HSI_mat_file = sp.loadmat(HSIAddress)
-        HSI = list(HSI_mat_file.keys())[-1]  # usually the last key of the dictonary is the name of the file
-        HSI = np.asarray(HSI_mat_file[HSI])  # save the image content as a 3D array
-        HSI_size = HSI.shape  # get the size of the array
-        if len(HSI_size) != 3:
-            continue
-        # Pre Processing - prepare the data set in pixel driven batch. for each pixel take all the layers
-        data = []  # generate data set for each pixel, a set of fixed X,Y - take all the layers combined as a vector
-        for x in range(0, HSI_size[0]):
-            for y in range(0, HSI_size[1]):
-                data.append(HSI[x, y, :])  # for each X,Y - take all the laywers as vector
-        data_set.append(np.array(data))  # convert it to numpy array
-
-
-get_data_per_pixel("/Users/mayagoldman/PycharmProjects/Moshal-Hackathon/data/*")
-print(data_set)
+from spectral import *
+# Parameters.
+# input_filename = "M3G20081118T222604_V01_RFL.IMG"
+# shape = (304, 1182, 85)  # matrix size
+# dtype = np.dtype('>u2')  # big-endian unsigned integer (16bit)
+# output_filename = "M3G20081118T222604_V01_RFL.PNG"
+#
+# # Reading.
+# fid = open(input_filename, 'rb')
+# data = np.fromfile(fid, dtype)
+# image = data.reshape(int(61085760 / 2), 2)
+#
+# # Display.
+# plt.imshow(data, cmap="gray")
+# # plt.savefig(output_filename)
+# plt.show()
+image = envi.open('M3G20081118T222604_V01_RFL.HDR')
+data = image.load()
+# pc = principal_components(image)
+# v = imshow(pc.cov)
+# pc_0999 = pc.reduce(fraction=0.999)
+# len(pc_0999.eigenvalues)
+# img_pc = pc_0999.transform(image)
+# v = imshow(img_pc[:,:,:3], stretch_all=True)
+# plt.show()
+(m, c) = kmeans(data[: , : , 4], nclusters=3, max_iterations=20)
+plt.imshow(m)
+plt.show()
