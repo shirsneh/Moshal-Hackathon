@@ -1,4 +1,5 @@
 import glob
+from collections import OrderedDict
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -10,13 +11,14 @@ from spectral import *
 
 
 class HSI_processing():
-    delta = None
     shape = None
     num_samples = None
     num_lines = None
     num_bands = None
     HSlayers = [5, 35, 50, 84]
     num_clusters = [2]
+    materials_dict = OrderedDict()
+    materials_dict['Olivine'] = 'data/s07_M3t_Olivine_GDS70.b_Fo89_115um_BECKb_AREF.txt'
     DataSet = []
     kmeans = None
     cluster_mtxs = []
@@ -80,7 +82,22 @@ class HSI_processing():
                 mean = sum / len(mask)
                 self.mean_vecs.append(mean)
 
-    def get_angle_between_mean_vectors_(self):
+    def load_material_spectral_data(self,filepath):
+        with open(filepath) as tf:
+            target_list = tf.readlines()[1:226]
+            target_arr = []
+            for i in range(0, (len(target_list) // 2 - 1)):
+                num1 = float(target_list[2 * i].replace("\n", ""))
+                num2 = float(target_list[2 * i + 1].replace("\n", ""))
+                target_arr.append(((num1 + num2) / 2) * 1000)
+            self.materials.append(target_arr)
+
+
+    def load_materials(self):
+        for material , filepath in self.materials_dict.items():
+            self.load_material_spectral_data(filepath)
+
+    def get_angle_between_mean_vectors(self , delta):
         def angle_between(v1, v2):
             v1_u = v1 / np.linalg.norm(v1)
             v2_u = v2 / np.linalg.norm(v2)
@@ -94,20 +111,19 @@ class HSI_processing():
                     angle = angle_between(v1, v2)
                     angles.append(angle)
                 min_angle = np.argmin(angles)
-                if angles[min_angle] >= self.delta:
+                if angles[min_angle] >= delta:
                     classification.append(-1)  # unclassified
                 else:
                     classification.append(min_angle)
             self.classification_mtx.append(classification)
 
+if __name__ == '__main__':
+    data_path = "data/M3G20081129T171431_V01_RFL.HDR"
+    prep = HSI_processing()
+    prep.load_data(data_path)
+    prep.load_materials()
+    prep.visualize_raw_data(data_path)
+    prep.KMeans(data_path)
+    prep.get_cluster_mean()
+    prep.get_angle_between_mean_vectors()
 
-prep = HSI_processing()
-prep.load_data("data/M3G20081129T171431_V01_RFL.HDR")
-# prep.visualize_raw_data("data/M3G20081118T222604_V01_RFL.HDR")
-prep.KMeans("data/M3G20081129T171431_V01_RFL.HDR")
-prep.get_cluster_mean()
-print(prep.mean_vecs)
-# print(type(prep.ClusteredPixels))
-#
-# data = pd.read_csv('output_list.txt', sep=" ", header=None)
-# data.columns = ["a", "b", "c", "etc."]
