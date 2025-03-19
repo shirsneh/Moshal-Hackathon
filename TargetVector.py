@@ -13,4 +13,5 @@ with open(target_filename) as tf:
 
     print(target_arr)
     print(len(target_arr))
+    
 
