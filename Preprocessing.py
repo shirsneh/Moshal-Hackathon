@@ -65,7 +65,7 @@ class HSI_processing():
                     Clustered_mtx[x, y] = self.kmeans.predict(_data[x, y, :].reshape(1, -1).astype(float))
             fig, ax = plt.subplots(figsize=(10, 7))
             plt.title(
-                f"ImageSize:{self.num_lines}x{self.num_samples} - {self.num_bands} Layers \n AI Algorithm for segmentation "
+                f"ImageSize:{self.num_lines}x{self.num_samples} - {self.num_bands} Layers"
                 f"\n Image splited to {Clusters} different segmentation")
             self.cluster_mtxs.append(Clustered_mtx)
             ax.set(xlabel='Xaxis', ylabel='Yaxis')
