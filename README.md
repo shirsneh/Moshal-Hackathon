@@ -36,12 +36,11 @@ pip install -r requirements.txt
 
 2. **Run the Tool**:  
    ```bash  
-   python moon_mineral_mapper.py --image moon_image.jpg --dataset mineral_data.csv  
+   python model.py --input data/image_name.HDR --output results 
    ```  
 
 3. **Output**:  
-   - A visual map highlighting areas of different minerals.  
-   - Analytical insights for further research.  
+   - A visual map highlighting areas of different minerals.   
 
 ---
 
