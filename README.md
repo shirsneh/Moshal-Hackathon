@@ -21,7 +21,7 @@ MoonMineralMapper is a Python-based tool that analyzes images of the Moon and ma
 To use MoonMineralMapper, clone the repository and install the required dependencies:  
 
 ```bash  
-git clone https://github.com/yourusername/MoonMineralMapper.git  
+git clone [https://github.com/yourusername/MoonMineralMapper.git  ](https://github.com/shirsneh/Moshal-Hackathon.git)
 cd MoonMineralMapper  
 pip install -r requirements.txt  
 ```  
