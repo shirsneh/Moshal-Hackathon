@@ -50,13 +50,13 @@ for HSimageAdress in HSimageList:
                 ClusteredPixel[x,y]=kmeans.predict(TheHSimage[x,y,:].reshape(1, -1))
         fig, ax = plt.subplots(figsize=(10, 7))
         plt.title(f"ImageName: {ImageName} \n ImageSize:{HSimageSize[0]}x{HSimageSize[1]} - {HSimageSize[2]} Layers \n Layer:{ChosenLayer}"
-                  f"\n AI Algorithm for segmentation \n Image splited to {Clusters} different segmentation")
+                  f"\n Image splited to {Clusters} different segmentation")
         plt.imshow(ClusteredPixel)
         ax.set(xlabel='Xaxis', ylabel='Yaxis')
         HSPDFReport.savefig(fig)
 
     print(f"Finish to generate PDF | name:{ImageName} | size: {HSimageSize}")
     HSPDFReport.close()
-print('Finish the code')
+
 
 
